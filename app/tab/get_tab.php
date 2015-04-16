@@ -22,7 +22,7 @@ foreach ($categorias as $key => $value) {
     $select_body.= '<option value="'.$value['id'].'">'.$value['name'].' --> '.$value['descripcion'].'</option>';
 }
 $select = '<select class="form-control select_categoria">'
-        . '<option>Selecione categoría 16042015</option>'
+        . '<option>Selecione categoría</option>'
         . $select_body.
         '</select>';
 ?>
