@@ -19,7 +19,7 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
 
     $categorias = $obj->GetCategory();
 
-    $contador = 0;
+    $contador = 1;
     foreach ($categorias as $key => $value) {
         $contador++;
         $table_body.= '<tr>'
