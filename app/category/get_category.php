@@ -10,11 +10,16 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 1) {
 //Comprobando que la operación sea 3 para sacar el texbox para edición 
 if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
     $textbox = $obj->GetCategoryId($_REQUEST['id']);
-    $html_edit = '<input type="text" class="form-control" value="'.$textbox[0]['name'].'">'
-                 . '<input type="text" class="form-control" value="'.$textbox[0]['descripcion'].'">';
+    $html_edit = '<input type="text" class="form-control name_category" id_category_update = "' . $_REQUEST['id'] . '" value="' . $textbox[0]['name'] . '">'
+            . '<input type="text" class="form-control descripcion_category" value="' . $textbox[0]['descripcion'] . '">';
     echo $html_edit;
-    print_r($textbox);
-    
+}
+//Delete
+elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
+    $textbox = $obj->GetCategoryId($_REQUEST['id']);
+    $html_edit = '<input type="text" class="form-control name_category" id_category_update = "' . $_REQUEST['id'] . '" value="' . $textbox[0]['name'] . '" disabled>'
+            . '<input type="text" class="form-control descripcion_category" value="' . $textbox[0]['descripcion'] . '" disabled>';
+    echo $html_edit;
 } else {
 
     $categorias = $obj->GetCategory();
@@ -70,12 +75,33 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-outline">Guardar</button>
+                    <button type="button" class="btn btn-outline up_category">Guardar</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
     </div>
     <!-- Fin de modal -->
+
+    <!-- Inicio de modal -->
+    <div class="modal modal-danger modal_category_delete">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">ELIMINAR CATEGORÍA</h4>
+                </div>
+                <div class="modal-body delete_category_modal">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-outline up_category">Guardar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- Fin de modal -->
+
     <script>
         $(document).ready(function () {
             $('.cancelar_categoria').hide();
@@ -123,7 +149,48 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
                 $('.modal_category').modal();
             });
 
+            //Mostrar modal para confirmación de eliminación
+            $('.delete_category').click(function (e) {
+                e.preventDefault();
+                var id = $(this).attr('id');
+                var operacion = 'delete'; //codigo para obtener la información en un texbox para edición
+                $.ajax({
+                    url: 'app/category/get_category.php',
+                    data: {id: id, operacion: operacion},
+                    type: 'post',
+                    dataType: 'html',
+                    success: function (datos) {
+                        $('.delete_category_modal').html(datos);
+                    }
+                });
+                $('.modal_category_delete').modal();
+            });
+
+            //Tomando los datos de la modal para edicion
+            $('.up_category').click(function (e) {
+                e.preventDefault();
+                var categoria = $('.name_category').val();
+                var id_categoria = $('.name_category').attr('id_category_update');
+                var descripcion = $('.descripcion_category').val();
+                $.ajax({
+                    url: 'app/category/set_category.php',
+                    data: {id: id_categoria, categoria: categoria, descripcion: descripcion},
+                    type: 'post',
+                    dataType: 'html',
+                    success: function (datos) {
+                        $.ajax({
+                            url: 'app/category/get_category.php',
+                            type: 'post',
+                            dataType: 'html',
+                            success: function (data) {
+                                $('.body_principal').html(data);
+                            }
+                        });
+                    }
+                });
+            });
+
         });
     </script>
-<?php
+    <?php
 }
