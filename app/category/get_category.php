@@ -19,7 +19,7 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
 
     $categorias = $obj->GetCategory();
 
-    $contador = 1;
+    $contador = 0;  //Esto es una prueba de ver si guarda los cambios en le repositorio
     foreach ($categorias as $key => $value) {
         $contador++;
         $table_body.= '<tr>'
