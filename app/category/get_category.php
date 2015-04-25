@@ -17,10 +17,30 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
 //Delete
 elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
     $textbox = $obj->GetCategoryId($_REQUEST['id']);
-    $html_edit = '<input type="text" class="form-control name_category" id_category_update = "' . $_REQUEST['id'] . '" value="' . $textbox[0]['name'] . '" disabled>'
-            . '<input type="text" class="form-control descripcion_category" value="' . $textbox[0]['descripcion'] . '" disabled>';
-    echo $html_edit;
+    $mess_elim = $obj->SearchEtiqueta($_REQUEST['id']);
+    if ($mess_elim === 0) {
+        $html_edit.= '<input type="text" class="form-control name_category" id_category_update = "' . $_REQUEST['id'] . '" value="' . $textbox[0]['name'] . '" disabled>'
+                . '<input type="text" class="form-control descripcion_category" value="' . $textbox[0]['descripcion'] . '" disabled>';
+        $disabled = '<script>'
+                . '$(document).ready(function(){'
+                . '$(".up_delete_category").show();'
+                . '});'
+                . '</script>';
+    } else {
+        $html_edit = '<h3>' . $textbox[0]['name'] . '</h3>' . $mess_elim;
+        $disabled = '<script>'
+                . '$(document).ready(function(){'
+                . '$(".up_delete_category").hide();'
+                . '});'
+                . '</script>';
+    }
+    echo $disabled . $html_edit;
 } else {
+
+    if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'confir_delete') {
+        $delete_categoria = $obj->delete_CategoriaConfir($_REQUEST['id']);
+        echo $delete_categoria;
+    }
 
     $categorias = $obj->GetCategory();
 
@@ -95,7 +115,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
-                    <button type="button" class="btn btn-outline up_category">Guardar</button>
+                    <button type="button" class="btn btn-outline up_delete_category">Eliminar</button>
                 </div>
             </div><!-- /.modal-content -->
         </div><!-- /.modal-dialog -->
@@ -186,6 +206,22 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
                                 $('.body_principal').html(data);
                             }
                         });
+                    }
+                });
+            });
+
+            //Llamada para eliminar
+            $('.up_delete_category').click(function (e) {
+                e.preventDefault();
+                var id_category = $('.name_category').attr('id_category_update');
+                var operacion = 'confir_delete';
+                $.ajax({
+                    url: 'app/category/get_category.php',
+                    data: {id: id_category, operacion: operacion},
+                    type: 'post',
+                    dataType: 'html',
+                    success: function (datos) {
+                        $('.body_principal').html(datos);
                     }
                 });
             });

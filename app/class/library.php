@@ -26,9 +26,32 @@ class library {
         return $data;
     }
     
-    //Buscar en etiquetas alguna categoria asiciada. Alerta no eliminacion
-    public function SearchEtiqueta($id = NULL){
-        
+    //Buscar en etiquetas alguna categoria asociada. Alerta no eliminacion
+    public function SearchEtiqueta($id_categoria = NULL){
+        $query = 'select count(id_category) as num from tab where id_category = ' . $id_categoria;
+        $result = mysql_query($query, $this->Conexion());
+        if ($result) {
+            $valor = mysql_fetch_assoc($result);            
+            if ($valor['num'] > 0) {
+                $etiquetas = $this->GetEtiquetaNomre($id_categoria);
+                $operacion = '<h2>Esta categoría no se puede eliminar, esta asignada a las siguientes etiquetas: </h2><h4>'.$etiquetas.'</h4>';
+            }  else {
+                $operacion = 0;
+            }
+        }
+        return $operacion;
+    }
+    
+    //Obteniendo las etiquetas asignadas a una categoria
+    public function GetEtiquetaNomre($id_categoria = NULL){
+        $query = 'select nombre from tab where id_category = ' . $id_categoria;
+        $result = mysql_query($query, $this->Conexion());
+        if ($result) {
+            while ($row = mysql_fetch_assoc($result)) {
+                $etiqueta.= $row['nombre'].',';
+            }
+        }
+        return $etiqueta;
     }
 
     public function set_Categoria($nombre = NULL, $desscripcion = NULL) {
@@ -89,6 +112,18 @@ class library {
             $operacion = '<h3>Operación de eliminacion registro ejecutado con exito.</h3>';
         } else {
             $operacion = '<h3>Operación de elinación no ejecutada.</h3>';
+        }
+        return $operacion;
+    }
+    
+    //Eliminando categoria
+    public function delete_CategoriaConfir($id_categoria = NULL){
+        $query = 'delete from category where id = ' . $id_categoria;
+        $result = mysql_query($query, $this->Conexion());
+        if ($result) {
+            $operacion = '<small>Categoria eliminada</small>';
+        }  else {
+            $operacion = '<small>Categoria no eliminada</small>';
         }
         return $operacion;
     }
