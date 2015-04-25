@@ -38,8 +38,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
 } else {
 
     if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'confir_delete') {
-        $delete_categoria = $obj->delete_CategoriaConfir($_REQUEST['id']);
-        echo $delete_categoria;
+        $delete_categoria = $obj->delete_CategoriaConfir($_REQUEST['id']);        
     }
 
     $categorias = $obj->GetCategory();
@@ -65,9 +64,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
         <div class="panel-heading">
             <h3 class="panel-title" id="panel-title">Administrador de categorias<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
         </div>
-        <div class="panel-body">
-
-
+        <div class="panel-body">            
             <div>
                 <button class="btn btn-success add_categoria"><span class="glyphicon glyphicon-plus"></span>  Nueva Categoria</button>
                 <button class="btn btn-danger cancelar_categoria"><span class="glyphicon glyphicon-remove"></span>  Cancelar</button>
@@ -82,7 +79,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
         </div>
     </div>
 
-    <!-- Inicio de modal -->
+    <!-- Inicio de modal EDITAR-->
     <div class="modal modal-primary modal_category">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -102,7 +99,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
     </div>
     <!-- Fin de modal -->
 
-    <!-- Inicio de modal -->
+    <!-- Inicio de modal para DELETE-->
     <div class="modal modal-danger modal_category_delete">
         <div class="modal-dialog">
             <div class="modal-content">

@@ -1,5 +1,4 @@
 <?php
-
 include_once '../class/library.php';
 $obj = new library();
 
@@ -8,43 +7,100 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 2) {
     $set = $obj->set_Tab($_REQUEST['nombre'], $_REQUEST['descripcion'], $_REQUEST['categoria']);
 }
 
-$tab_show = $obj->get_Tab();
+//Comprobando que la operación sea 3 para sacar el texbox para edición 
+if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
+    $textbox = $obj->get_TabId($_REQUEST['id']);
+    $html_edit = '<input type="text" class="form-control name_etiqueta" id_etiqueta_update = "' . $_REQUEST['id'] . '" value="' . $textbox[0]['nombre'] . '">'
+            . '<input type="text" class="form-control descripcion_etiqueta" value="' . $textbox[0]['descripcion'] . '">';
+    echo $html_edit;
+}else {
 
-$contador = 0;
+    $tab_show = $obj->get_Tab();
 
-foreach ($tab_show as $key => $value) {
-    $contador ++;
-    $table_body.= '<tr><td>'.$contador.'</td><td>'.$value['nombre'].'</td><td>'.$value['descripcion'].'</td><td>'.$value['categoria'].'</td></tr>';
-}
+    $contador = 0;
 
-$categorias = $obj->GetCategory();
-foreach ($categorias as $key => $value) {
-    $select_body.= '<option value="'.$value['id'].'">'.$value['name'].' --> '.$value['descripcion'].'</option>';
-}
-$select = '<select class="form-control select_categoria">'
-        . '<option>Selecione categoría</option>'
-        . $select_body.
-        '</select>';
-?>
+    foreach ($tab_show as $key => $value) {
+        $contador ++;
+        $table_body.= '<tr>'
+                . '<td>' . $contador . '</td><td>' . $value['nombre'] . '</td>'
+                . '<td>' . $value['descripcion'] . '</td><td>' . $value['categoria'] . '</td>'
+                . '<td>'
+                . '<a href="#">'
+                . '<i id="' . $value['id_etiq'] . '" class="fa fa-fw fa-pencil-square-o edit_etiqueta"></i>'
+                . '<i id="' . $value['id_etiq'] . '" class="fa fa-fw fa-eraser delete_etiqueta"></i>'
+                . '</a>'
+                . '</td>'
+                . '</tr>';
+    }
 
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        <h3 class="panel-title" id="panel-title">Administrador de etiquetas<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
-    </div>
-    <div class="panel-body"> 
-        <div>
-            <button class="btn btn-success add_etiqueta"><span class="glyphicon glyphicon-plus"></span>  Nueva Etiqueta</button>
-            <button class="btn btn-danger cancelar_etiqueta"><span class="glyphicon glyphicon-remove"></span>  Cancelar</button>
-            <div class="new_etiqueta"></div>
+    $categorias = $obj->GetCategory();
+    foreach ($categorias as $key => $value) {
+        $select_body.= '<option value="' . $value['id'] . '">' . $value['name'] . ' --> ' . $value['descripcion'] . '</option>';
+    }
+    $select = '<select class="form-control select_categoria">'
+            . '<option>Selecione categoría</option>'
+            . $select_body .
+            '</select>';
+    ?>
+
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h3 class="panel-title" id="panel-title">Administrador de etiquetas<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
         </div>
-        <div class="box">    
-            <table class="table table-bordered text-center">
-                <thead><tr><th>#</th><th>Etiqueta</th><th>Descripción</th><th>Categoria</th></tr></thead>
-                <?php echo $table_body; ?>
-            </table>
+        <div class="panel-body"> 
+            <div>
+                <button class="btn btn-success add_etiqueta"><span class="glyphicon glyphicon-plus"></span>  Nueva Etiqueta</button>
+                <button class="btn btn-danger cancelar_etiqueta"><span class="glyphicon glyphicon-remove"></span>  Cancelar</button>
+                <div class="new_etiqueta"></div>
+            </div>
+            <div class="box">    
+                <table class="table table-bordered text-center">
+                    <thead><tr><th>#</th><th>Etiqueta</th><th>Descripción</th><th>Categoria</th><th>Edición</th></tr></thead>
+                    <?php echo $table_body; ?>
+                </table>
+            </div>
         </div>
     </div>
-</div>
+
+    <!-- Inicio de modal EDITAR-->
+    <div class="modal modal-primary modal_etiqueta">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">EDITAR ETIQUETA</h4>
+                </div>
+                <div class="modal-body body_etiqueta">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-outline up_etiqueta">Guardar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- Fin de modal -->
+
+    <!-- Inicio de modal para DELETE-->
+    <div class="modal modal-danger modal_category_etiqueta">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
+                    <h4 class="modal-title">ELIMINAR ETIQUETA</h4>
+                </div>
+                <div class="modal-body delete_category_modal">
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-outline up_delete_etiqueta">Eliminar</button>
+                </div>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div>
+    <!-- Fin de modal -->
 
 <script>
     $(document).ready(function () {
@@ -60,7 +116,7 @@ $select = '<select class="form-control select_categoria">'
                 var operacion = 2;  //Este valor sera para identificar que va ingresar una nueva etiqueta
                 $.ajax({
                     url: 'app/tab/get_tab.php',
-                    data: {nombre: nombre_etiqueta, descripcion: etiqueta_descrip, categoria:categoria, operacion: operacion},
+                    data: {nombre: nombre_etiqueta, descripcion: etiqueta_descrip, categoria: categoria, operacion: operacion},
                     type: 'post',
                     dataType: 'html',
                     success: function (datos) {
@@ -75,5 +131,34 @@ $select = '<select class="form-control select_categoria">'
             $('.cancelar_etiqueta').hide();
         });
 
+        //Mostrar modal para editar etiqueta
+        $('.edit_etiqueta').click(function (e) {
+            e.preventDefault();
+            var id = $(this).attr('id');
+            var operacion = 3; //codigo para obtener la información en un texbox para edición
+            $.ajax({
+                url: 'app/tab/get_tab.php',
+                data: {id: id, operacion: operacion},
+                type: 'post',
+                dataType: 'html',
+                success: function (datos) {
+                    $('.body_etiqueta').html(datos);
+                }
+            });
+            $('.modal_etiqueta').modal();
+        });
+        
+        //Tomando valores de los texbox que describen el nombre de la etiqueta y la descripción
+        $('.up_etiqueta').click(function(e){
+            e.preventDefault();
+            var id = $('.name_etiqueta').attr('id_etiqueta_update');
+            var data = $('.name_etiqueta').val();
+            alert(id + ' ' + data);
+        });
+
     });
 </script>
+
+<?php
+}
+?>

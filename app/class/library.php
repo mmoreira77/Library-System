@@ -81,9 +81,20 @@ class library {
     }
 
     public function get_Tab() {
-        $query = 'select a.nombre,a.descripcion,b.name as categoria, b.id from tab as a
+        $query = 'select a.id as id_etiq, a.nombre,a.descripcion,b.name as categoria, b.id from tab as a
                     inner join category as b
                     on a.id_category = b.id';
+        $result = mysql_query($query, $this->Conexion());
+        while ($row = mysql_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
+    }
+    
+    public function get_TabId($id_etiqueta = NULL) {
+        $query = 'select a.id as id_etiq, a.nombre,a.descripcion,b.name as categoria, b.id from tab as a
+                    inner join category as b
+                    on a.id_category = b.id and a.id = '.$id_etiqueta;
         $result = mysql_query($query, $this->Conexion());
         while ($row = mysql_fetch_assoc($result)) {
             $data[] = $row;
@@ -128,4 +139,20 @@ class library {
         return $operacion;
     }
 
+}
+
+//Definiendo clase para trabajar con categorias
+class Tab{
+    //Actualizar categoria el nombre o descripción
+    public function update_Categoria($id = NULL, $nombre = NULL, $descripcion = NULL) {
+        $date_modify = date('Y-m-d H:i:s');
+        $query = 'update category set date_modify = "' . $date_modify . '", name = "' . $nombre . '", descripcion = "' . $descripcion . '" where id = ' . $id;
+        $result = mysql_query($query, $this->Conexion());
+        if ($result) {
+            $operacion = $id; //Exito en la actualizacion
+        } else {
+            $operacion = 0;  //Error en la actualización
+        }
+        return $operacion;
+    }
 }
