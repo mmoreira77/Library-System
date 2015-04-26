@@ -43,7 +43,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
 
     $categorias = $obj->GetCategory();
 
-    $contador = 3;
+    $contador = 0;
     foreach ($categorias as $key => $value) {
         $contador++;
         $table_body.= '<tr>'
