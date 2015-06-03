@@ -177,7 +177,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
         });
         
         //Mostrar modal para confirmación de eliminación
-            $('.delete_category').click(function (e) {
+            $('.delete_etiqueta').click(function (e) {
                 e.preventDefault();
                 var id = $(this).attr('id');
                 var operacion = 'delete'; //codigo para obtener la información en un texbox para edición
