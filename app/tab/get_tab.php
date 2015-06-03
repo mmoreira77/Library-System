@@ -1,6 +1,7 @@
 <?php
 include_once '../class/library.php';
 $obj = new library();
+$tab  = new Tab();
 
 //validando la variable operación si existe para proceder a guardar una nueva categoria
 if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 2) {
@@ -8,11 +9,13 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 2) {
 }
 
 //Comprobando que la operación sea 3 para sacar el texbox para edición 
-if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
+elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
     $textbox = $obj->get_TabId($_REQUEST['id']);
     $html_edit = '<input type="text" class="form-control name_etiqueta" id_etiqueta_update = "' . $_REQUEST['id'] . '" value="' . $textbox[0]['nombre'] . '">'
             . '<input type="text" class="form-control descripcion_etiqueta" value="' . $textbox[0]['descripcion'] . '">';
     echo $html_edit;
+}elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 4) {
+    $operacion = $tab->update_Etiqueta($_REQUEST['id'], $_REQUEST['nombre'], $_REQUEST['descripcion']);
 }else {
 
     $tab_show = $obj->get_Tab();
@@ -83,7 +86,7 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
     <!-- Fin de modal -->
 
     <!-- Inicio de modal para DELETE-->
-    <div class="modal modal-danger modal_category_etiqueta">
+    <div class="modal modal-danger modal_etiqueta_delete">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -153,8 +156,58 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
             e.preventDefault();
             var id = $('.name_etiqueta').attr('id_etiqueta_update');
             var data = $('.name_etiqueta').val();
-            alert(id + ' ' + data);
+            var descrip_data = $('.descripcion_etiqueta').val();
+            var operacion = 4;  //Valor para identificar que se actualizara el nombre de la etiqueta o la descripcion
+            $.ajax({
+                url: 'app/tab/get_tab.php',
+                data: {id: id, operacion: operacion, nombre:data, descripcion:descrip_data},
+                type: 'post',
+                dataType: 'html',
+                success: function (datos) {
+                    $.ajax({
+                        url: 'app/tab/get_tab.php',
+                        type: 'post',
+                        dataType: 'html',
+                        success: function(datos){
+                            $('.body_principal').html(datos);
+                        }
+                    });
+                }
+            });
         });
+        
+        //Mostrar modal para confirmación de eliminación
+            $('.delete_category').click(function (e) {
+                e.preventDefault();
+                var id = $(this).attr('id');
+                var operacion = 'delete'; //codigo para obtener la información en un texbox para edición
+                $.ajax({
+                    url: 'app/tab/get_tab.php',
+                    data: {id: id, operacion: operacion},
+                    type: 'post',
+                    dataType: 'html',
+                    success: function (datos) {
+                        $('.delete_etiqueta_modal').html(datos);
+                    }
+                });
+                $('.modal_etiqueta_delete').modal();
+            });
+        
+        //Llamada para eliminar etiqueta
+            $('.up_delete_etiqueta').click(function (e) {
+                e.preventDefault();
+                var id_etiqueta = $('.name_etiqueta').attr('id_etiqueta_update');
+                var operacion = 'confir_delete';
+                $.ajax({
+                    url: 'app/tab/get_tab.php',
+                    data: {id: id_etiqueta, operacion: operacion},
+                    type: 'post',
+                    dataType: 'html',
+                    success: function (datos) {
+                        $('.body_principal').html(datos);
+                    }
+                });
+            });
 
     });
 </script>

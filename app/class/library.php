@@ -141,12 +141,12 @@ class library {
 
 }
 
-//Definiendo clase para trabajar con categorias
-class Tab{
-    //Actualizar categoria el nombre o descripción
-    public function update_Categoria($id = NULL, $nombre = NULL, $descripcion = NULL) {
+//Definiendo clase para trabajar con etiquetas
+class Tab extends library{
+    //Actualizar etiqueta el nombre o descripción
+    public function update_Etiqueta($id = NULL, $nombre = NULL, $descripcion = NULL) {
         $date_modify = date('Y-m-d H:i:s');
-        $query = 'update category set date_modify = "' . $date_modify . '", name = "' . $nombre . '", descripcion = "' . $descripcion . '" where id = ' . $id;
+        $query = 'update tab set date_modify = "' . $date_modify . '", nombre = "' . $nombre . '", descripcion = "' . $descripcion . '" where id = ' . $id;
         $result = mysql_query($query, $this->Conexion());
         if ($result) {
             $operacion = $id; //Exito en la actualizacion
