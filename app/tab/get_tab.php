@@ -1,7 +1,7 @@
 <?php
 include_once '../class/library.php';
 $obj = new library();
-$tab  = new Tab();
+$tab = new Tab();
 
 //validando la variable operación si existe para proceder a guardar una nueva categoria
 if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 2) {
@@ -14,9 +14,23 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
     $html_edit = '<input type="text" class="form-control name_etiqueta" id_etiqueta_update = "' . $_REQUEST['id'] . '" value="' . $textbox[0]['nombre'] . '">'
             . '<input type="text" class="form-control descripcion_etiqueta" value="' . $textbox[0]['descripcion'] . '">';
     echo $html_edit;
-}elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 4) {
+}
+//Actualizando etiqueta
+elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 4) {
     $operacion = $tab->update_Etiqueta($_REQUEST['id'], $_REQUEST['nombre'], $_REQUEST['descripcion']);
-}else {
+} 
+//alerta de confirmación de eliminación para etiqueta seleccionada
+elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'delete') {
+    $delete = $tab->GetEtiquetaId($_REQUEST['id']);
+    echo $html_edit.= '<input type="text" class="form-control name_etiqueta" id_etiqueta_update = "' . $_REQUEST['id'] . '" value="' . $delete[0]['nombre'] . '" disabled>'
+                    . '<input type="text" class="form-control descripcion_etiqueta" value="' . $delete[0]['descripcion'] . '" disabled>'
+                    . '<input type="text" class="form-control" value="' . $delete[0]['category'] . '" disabled>';
+} else {
+    
+    //Eliminando etiqueta
+    if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 'confir_delete') {
+        $delete_categoria = $tab->delete_EtiquetaConfir($_REQUEST['id']);        
+    }
 
     $tab_show = $obj->get_Tab();
 
@@ -93,7 +107,7 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">×</span></button>
                     <h4 class="modal-title">ELIMINAR ETIQUETA</h4>
                 </div>
-                <div class="modal-body delete_category_modal">
+                <div class="modal-body delete_etiqueta_modal">
 
                 </div>
                 <div class="modal-footer">
@@ -105,78 +119,85 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
     </div>
     <!-- Fin de modal -->
 
-<script>
-    $(document).ready(function () {
-        $('.cancelar_etiqueta').hide();
+    <script>
+        $(document).ready(function () {
+            $('.cancelar_etiqueta').hide();
 
-        $('.add_etiqueta').click(function () {
-            $('.new_etiqueta').html('<hr><input type="text" class="form-control name_etiqueta" placeholder="Nombre etiqueta"><input type="text" class="form-control etiqueta_descrip" placeholder="Descripción"><?php echo $select; ?><button class="btn btn-block btn-primary btn-lg save_etiqueta">Guardar</button><hr>');
-            $('.cancelar_etiqueta').show();
-            $('.save_etiqueta').click(function () {
-                var nombre_etiqueta = $('.name_etiqueta').val();
-                var etiqueta_descrip = $('.etiqueta_descrip').val();
-                var categoria = $('.select_categoria').val();
-                var operacion = 2;  //Este valor sera para identificar que va ingresar una nueva etiqueta
+            $('.add_etiqueta').click(function () {
+                $('.new_etiqueta').html('<hr><input type="text" class="form-control name_etiqueta" placeholder="Nombre etiqueta"><input type="text" class="form-control etiqueta_descrip" placeholder="Descripción"><?php echo $select; ?><button class="btn btn-block btn-primary btn-lg save_etiqueta">Guardar</button><hr>');
+                $('.cancelar_etiqueta').show();
+                $('.save_etiqueta').click(function () {
+                    var nombre_etiqueta = $('.name_etiqueta').val();
+                    var etiqueta_descrip = $('.etiqueta_descrip').val();
+                    var categoria = $('.select_categoria').val();
+                    var operacion = 2;  //Este valor sera para identificar que va ingresar una nueva etiqueta
+                    $.ajax({
+                        url: 'app/tab/get_tab.php',
+                        data: {nombre: nombre_etiqueta, descripcion: etiqueta_descrip, categoria: categoria, operacion: operacion},
+                        type: 'post',
+                        dataType: 'html',
+                        success: function (datos) {
+                            $.ajax({
+                                url: 'app/tab/get_tab.php',
+                                type: 'post',
+                                dataType: 'html',
+                                success: function (datos) {
+                                    $('.body_principal').html(datos);
+                                }
+                            });
+                        }
+                    });
+                });
+            });
+
+            $('.cancelar_etiqueta').click(function () {
+                $('.new_etiqueta').html('');
+                $('.cancelar_etiqueta').hide();
+            });
+
+            //Mostrar modal para editar etiqueta
+            $('.edit_etiqueta').click(function (e) {
+                e.preventDefault();
+                var id = $(this).attr('id');
+                var operacion = 3; //codigo para obtener la información en un texbox para edición
                 $.ajax({
                     url: 'app/tab/get_tab.php',
-                    data: {nombre: nombre_etiqueta, descripcion: etiqueta_descrip, categoria: categoria, operacion: operacion},
+                    data: {id: id, operacion: operacion},
                     type: 'post',
                     dataType: 'html',
                     success: function (datos) {
-                        $('.body_principal').html(datos);
+                        $('.body_etiqueta').html(datos);
+                    }
+                });
+                $('.modal_etiqueta').modal();
+            });
+
+            //Tomando valores de los texbox que describen el nombre de la etiqueta y la descripción
+            $('.up_etiqueta').click(function (e) {
+                e.preventDefault();
+                var id = $('.name_etiqueta').attr('id_etiqueta_update');
+                var data = $('.name_etiqueta').val();
+                var descrip_data = $('.descripcion_etiqueta').val();
+                var operacion = 4;  //Valor para identificar que se actualizara el nombre de la etiqueta o la descripcion
+                $.ajax({
+                    url: 'app/tab/get_tab.php',
+                    data: {id: id, operacion: operacion, nombre: data, descripcion: descrip_data},
+                    type: 'post',
+                    dataType: 'html',
+                    success: function (datos) {
+                        $.ajax({
+                            url: 'app/tab/get_tab.php',
+                            type: 'post',
+                            dataType: 'html',
+                            success: function (datos) {
+                                $('.body_principal').html(datos);
+                            }
+                        });
                     }
                 });
             });
-        });
 
-        $('.cancelar_etiqueta').click(function () {
-            $('.new_etiqueta').html('');
-            $('.cancelar_etiqueta').hide();
-        });
-
-        //Mostrar modal para editar etiqueta
-        $('.edit_etiqueta').click(function (e) {
-            e.preventDefault();
-            var id = $(this).attr('id');
-            var operacion = 3; //codigo para obtener la información en un texbox para edición
-            $.ajax({
-                url: 'app/tab/get_tab.php',
-                data: {id: id, operacion: operacion},
-                type: 'post',
-                dataType: 'html',
-                success: function (datos) {
-                    $('.body_etiqueta').html(datos);
-                }
-            });
-            $('.modal_etiqueta').modal();
-        });
-        
-        //Tomando valores de los texbox que describen el nombre de la etiqueta y la descripción
-        $('.up_etiqueta').click(function(e){
-            e.preventDefault();
-            var id = $('.name_etiqueta').attr('id_etiqueta_update');
-            var data = $('.name_etiqueta').val();
-            var descrip_data = $('.descripcion_etiqueta').val();
-            var operacion = 4;  //Valor para identificar que se actualizara el nombre de la etiqueta o la descripcion
-            $.ajax({
-                url: 'app/tab/get_tab.php',
-                data: {id: id, operacion: operacion, nombre:data, descripcion:descrip_data},
-                type: 'post',
-                dataType: 'html',
-                success: function (datos) {
-                    $.ajax({
-                        url: 'app/tab/get_tab.php',
-                        type: 'post',
-                        dataType: 'html',
-                        success: function(datos){
-                            $('.body_principal').html(datos);
-                        }
-                    });
-                }
-            });
-        });
-        
-        //Mostrar modal para confirmación de eliminación
+            //Mostrar modal para confirmación de eliminación
             $('.delete_etiqueta').click(function (e) {
                 e.preventDefault();
                 var id = $(this).attr('id');
@@ -192,8 +213,8 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
                 });
                 $('.modal_etiqueta_delete').modal();
             });
-        
-        //Llamada para eliminar etiqueta
+
+            //Llamada para eliminar etiqueta
             $('.up_delete_etiqueta').click(function (e) {
                 e.preventDefault();
                 var id_etiqueta = $('.name_etiqueta').attr('id_etiqueta_update');
@@ -209,9 +230,9 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 3) {
                 });
             });
 
-    });
-</script>
+        });
+    </script>
 
-<?php
+    <?php
 }
 ?>

@@ -25,30 +25,30 @@ class library {
         }
         return $data;
     }
-    
+
     //Buscar en etiquetas alguna categoria asociada. Alerta no eliminacion
-    public function SearchEtiqueta($id_categoria = NULL){
+    public function SearchEtiqueta($id_categoria = NULL) {
         $query = 'select count(id_category) as num from tab where id_category = ' . $id_categoria;
         $result = mysql_query($query, $this->Conexion());
         if ($result) {
-            $valor = mysql_fetch_assoc($result);            
+            $valor = mysql_fetch_assoc($result);
             if ($valor['num'] > 0) {
                 $etiquetas = $this->GetEtiquetaNomre($id_categoria);
-                $operacion = '<h2>Esta categoría no se puede eliminar, esta asignada a las siguientes etiquetas: </h2><h4>'.$etiquetas.'</h4>';
-            }  else {
+                $operacion = '<h2>Esta categoría no se puede eliminar, esta asignada a las siguientes etiquetas: </h2><h4>' . $etiquetas . '</h4>';
+            } else {
                 $operacion = 0;
             }
         }
         return $operacion;
     }
-    
+
     //Obteniendo las etiquetas asignadas a una categoria
-    public function GetEtiquetaNomre($id_categoria = NULL){
+    public function GetEtiquetaNomre($id_categoria = NULL) {
         $query = 'select nombre from tab where id_category = ' . $id_categoria;
         $result = mysql_query($query, $this->Conexion());
         if ($result) {
             while ($row = mysql_fetch_assoc($result)) {
-                $etiqueta.= $row['nombre'].',';
+                $etiqueta.= $row['nombre'] . ',';
             }
         }
         return $etiqueta;
@@ -90,11 +90,11 @@ class library {
         }
         return $data;
     }
-    
+
     public function get_TabId($id_etiqueta = NULL) {
         $query = 'select a.id as id_etiq, a.nombre,a.descripcion,b.name as categoria, b.id from tab as a
                     inner join category as b
-                    on a.id_category = b.id and a.id = '.$id_etiqueta;
+                    on a.id_category = b.id and a.id = ' . $id_etiqueta;
         $result = mysql_query($query, $this->Conexion());
         while ($row = mysql_fetch_assoc($result)) {
             $data[] = $row;
@@ -126,14 +126,14 @@ class library {
         }
         return $operacion;
     }
-    
+
     //Eliminando categoria
-    public function delete_CategoriaConfir($id_categoria = NULL){
+    public function delete_CategoriaConfir($id_categoria = NULL) {
         $query = 'delete from category where id = ' . $id_categoria;
         $result = mysql_query($query, $this->Conexion());
         if ($result) {
             $operacion = '<small>Categoria eliminada</small>';
-        }  else {
+        } else {
             $operacion = '<small>Categoria no eliminada</small>';
         }
         return $operacion;
@@ -142,7 +142,8 @@ class library {
 }
 
 //Definiendo clase para trabajar con etiquetas
-class Tab extends library{
+class Tab extends library {
+
     //Actualizar etiqueta el nombre o descripción
     public function update_Etiqueta($id = NULL, $nombre = NULL, $descripcion = NULL) {
         $date_modify = date('Y-m-d H:i:s');
@@ -155,4 +156,32 @@ class Tab extends library{
         }
         return $operacion;
     }
+
+    //Obteniendo etiqueta a eliminar con la categoria pegada
+    public function GetEtiquetaId($id = NULL) {
+        $query = 'select a.nombre, a.descripcion, b.name as category
+                    from tab as a 
+                    inner join category as b
+                    on a.id_category = b.id
+                    where 
+                    a.id = ' . $id;
+        $result = mysql_query($query, $this->Conexion());
+        while ($row = mysql_fetch_assoc($result)) {
+            $data[] = $row;
+        }
+        return $data;
+    }
+    
+    //Eliminando etiqueta
+    public function delete_EtiquetaConfir($id = NULL) {
+        $query = 'delete from tab where id = ' . $id;
+        $result = mysql_query($query, $this->Conexion());
+        if ($result) {
+            $operacion = '<small>Etiqueta eliminada</small>';
+        } else {
+            $operacion = '<small>Etiqueta no eliminada</small>';
+        }
+        return $operacion;
+    }
+
 }
