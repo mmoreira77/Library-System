@@ -325,31 +325,33 @@
                             <a href="#">
                                 <i class="fa fa-files-o"></i>
                                 <span>Catalogación</span>
-                                <span class="label label-primary pull-right">4</span>
+                                <!-- <span class="label label-primary pull-right">4</span> -->
+                                <i class="fa fa-angle-left pull-right"></i>
                             </a>
                             <ul class="treeview-menu">
                                 <li><a href="pages/layout/top-nav.html"><i class="fa fa-circle-o"></i> Buscar</a></li>
-                                <li><a href="pages/layout/boxed.html"><i class="fa fa-circle-o"></i> Nuevo registro</a></li>
+                                <li><a href="pages/layout/boxed.html"><i class="fa fa-circle-o"></i> Nuevo registroff</a></li>
                                 <li><a href="pages/layout/fixed.html"><i class="fa fa-circle-o"></i> Fixed</a></li>
                                 <li><a href="pages/layout/collapsed-sidebar.html"><i class="fa fa-circle-o"></i> Collapsed Sidebar</a></li>
                             </ul>
-                        </li> 
+                        </li>                         
+                        <li class="treeview">
+                            <a href="#">
+                                <i class="fa fa-bookmark"></i>
+                                <span>MARC Framework</span>
+                                <i class="fa fa-angle-left pull-right"></i>
+                            </a>
+                            <ul class="treeview-menu">
+                                <li class="item_material"><a href="#"><i class="fa fa-circle-o"></i> Material Item</a></li>
+                                <li><a href="#"><i class="fa fa-circle-o"></i> Etiquetas</a></li>
+                                <li><a href="#"><i class="fa fa-circle-o"></i> Indicadores</a></li>
+                                <li><a href="#"><i class="fa fa-circle-o"></i> Campos</a></li>
+                            </ul>
+                        </li>
                         <li>
                             <a href="pages/widgets.html">
                                 <i class="fa fa-th"></i> <span>Widgets</span> <small class="label pull-right bg-green">new</small>
                             </a>
-                        </li>
-                        <li class="treeview">
-                            <a href="#">
-                                <i class="fa fa-pie-chart"></i>
-                                <span>Charts</span>
-                                <i class="fa fa-angle-left pull-right"></i>
-                            </a>
-                            <ul class="treeview-menu">
-                                <li><a href="pages/charts/morris.html"><i class="fa fa-circle-o"></i> Morris</a></li>
-                                <li><a href="pages/charts/flot.html"><i class="fa fa-circle-o"></i> Flot</a></li>
-                                <li><a href="pages/charts/inline.html"><i class="fa fa-circle-o"></i> Inline charts</a></li>
-                            </ul>
                         </li>
                         <li class="treeview">
                             <a href="#">
@@ -934,6 +936,8 @@
                   
         <script>
             $(document).ready(function () {
+                
+                //Llamda a categorias
                 $('.categorias').click(function () {
                     $.ajax({
                         url: 'app/category/get_category.php',
@@ -944,9 +948,24 @@
                         }
                     });
                 });
+                
+                //Llamada a etiquetas
                 $('.tematicas').click(function(){
                     $.ajax({
                         url: 'app/tab/get_tab.php',
+                        type: 'post',
+                        dataType: 'html',
+                        success: function(datos){
+                            $('.body_principal').html(datos);
+                        }
+                    });
+                });
+                
+                //Llamada a meteerial
+                $('.item_material').click(function(e){
+                    e.preventDefault();
+                    $.ajax({
+                        url: 'app/marc/item_material.php',
                         type: 'post',
                         dataType: 'html',
                         success: function(datos){

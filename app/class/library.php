@@ -1,12 +1,14 @@
 <?php
 
-class library {
-
+class Conexion{
     public function Conexion() {
         $link = mysql_connect('localhost', 'root', '191519') or die('Problemas en la conexión');
         $db = mysql_select_db('library', $link) or die('Problema en la selección de la base de datos');
         return $link;
     }
+}
+
+class library extends Conexion{    
 
     public function GetCategory() {
         $query = 'select id,name,descripcion from category';
@@ -184,4 +186,33 @@ class Tab extends library {
         return $operacion;
     }
 
+}
+
+//Definiendo clase para trabajar con marc
+class Marc extends library{
+    
+    //Llamada a todos los tipos de material existentes
+    public function GetTipoMaterial(){
+        $query = 'select name,descripcion,icono from lib_tipo_material';
+        $result = mysql_query($query,  $this->Conexion());
+        if ($result) {
+            while ($row = mysql_fetch_assoc($result)) {
+                $data[] = $row;
+            }
+            $table = $this->OrdenarTipoMaterial($data);
+        }
+        return $table;
+    }
+    
+    //Ordeando tipo de material
+    public function OrdenarTipoMaterial($data = NULL){
+        $contador = 0;
+        foreach ($data as $key => $value) {
+            $contador++;
+            $table_body.= '<tr><td>'.$contador.'</td><td><img src="app/img/'.$value['icono'].'"/></td><td>'.$value['name'].'</td>'
+                    . '<td>'.$value['descripcion'].'</td></tr>';
+        }
+        return $table_body;
+    }
+    
 }
