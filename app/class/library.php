@@ -1,14 +1,16 @@
 <?php
 
-class Conexion{
+class Conexion {
+
     public function Conexion() {
         $link = mysql_connect('localhost', 'root', '191519') or die('Problemas en la conexión');
         $db = mysql_select_db('library', $link) or die('Problema en la selección de la base de datos');
         return $link;
     }
+
 }
 
-class library extends Conexion{    
+class library extends Conexion {
 
     public function GetCategory() {
         $query = 'select id,name,descripcion from category';
@@ -173,7 +175,7 @@ class Tab extends library {
         }
         return $data;
     }
-    
+
     //Eliminando etiqueta
     public function delete_EtiquetaConfir($id = NULL) {
         $query = 'delete from tab where id = ' . $id;
@@ -189,12 +191,12 @@ class Tab extends library {
 }
 
 //Definiendo clase para trabajar con marc
-class Marc extends library{
-    
+class Marc extends library {
+
     //Llamada a todos los tipos de material existentes
-    public function GetTipoMaterial(){
+    public function GetTipoMaterial() {
         $query = 'select name,descripcion,icono from lib_tipo_material';
-        $result = mysql_query($query,  $this->Conexion());
+        $result = mysql_query($query, $this->Conexion());
         if ($result) {
             while ($row = mysql_fetch_assoc($result)) {
                 $data[] = $row;
@@ -203,16 +205,52 @@ class Marc extends library{
         }
         return $table;
     }
-    
+
     //Ordeando tipo de material
-    public function OrdenarTipoMaterial($data = NULL){
+    public function OrdenarTipoMaterial($data = NULL) {
         $contador = 0;
         foreach ($data as $key => $value) {
             $contador++;
-            $table_body.= '<tr><td>'.$contador.'</td><td><img src="app/img/'.$value['icono'].'"/></td><td>'.$value['name'].'</td>'
-                    . '<td>'.$value['descripcion'].'</td></tr>';
+            $table_body.= '<tr><td>' . $contador . '</td><td><img src="app/img/' . $value['icono'] . '"/></td><td>' . $value['name'] . '</td>'
+                    . '<td>' . $value['descripcion'] . '</td></tr>';
         }
-        return $table_body;
+        $table = '<table class="table table-bordered text-center">
+                <thead><tr><th>#</th><th>Icono</th><th>Material</th><th>Descripción</th><th>Edición</th></tr></thead>';
+        $table_fin = '</table>';
+        return $table.$table_body.$table_fin;
     }
-    
+
+    //Preparando para guardar nuevo registro. Desfragmentando información de la imagen
+    public function SaveNewRegistro($data_post = NULL, $data_file = NULL) {
+        if (count($data_file) > 0 && count($data_post) > 0) {
+            $ruta_img = '../img/';
+            foreach ($data_file as $value) {
+                //Verificando que no existan errores en el envio del archivo
+                if ($value['error'] == UPLOAD_ERR_OK) {
+                    $file_name = $value['name'];
+                    $file_tmp_name = $value['tmp_name'];
+                    $ruta_final = $ruta_img . $file_name;
+                    $result = move_uploaded_file($file_tmp_name, $ruta_final);
+                    if ($result) {
+                        $query = 'INSERT INTO lib_tipo_material (name, descripcion, icono, date_create, date_modify) '
+                                . ' values("'.$data_post['InputNameTipoMaterial'].'", "'.$data_post['InputDescripcion'].'",'
+                                . '"'.$file_name.'", "'.  date('Y-m-d H:i:s').'", "'.  date('Y-m-d H:i:s').'")';
+                        $exec = mysql_query($query, $this->Conexion());
+                        if ($exec) {
+                        $ope = $this->GetTipoMaterial();    
+                        }  else {
+                        $ope = '<h4>Error en la insercion del registro</h4>';
+                        }
+                        
+                    } else {
+                        $ope = 'Operación de subir archivo con error  al mover archivo ';
+                    }
+                }else{
+                    $ope = 'Error en el envio la recepción de archivo --> ' . $value['error'];
+                }
+            }
+        }
+        return $ope;
+    }
+
 }
