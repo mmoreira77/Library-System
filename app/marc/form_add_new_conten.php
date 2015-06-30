@@ -13,10 +13,14 @@
                 <label for="InputDescripcion">Descripción</label>
                 <input type="text" class="form-control" id="InputDescripcion" name="InputDescripcion" placeholder="Descripción">
             </div>
-            <div class="form-group">
+            <div class="form-group col-lg-6">
                 <label for="InputFile">Icono imagen</label>
                 <input type="file" class="form-control" id="InputFile" name="InputFile">
-            </div>               
+            </div>
+            <div class="form-group col-lg-6">
+                <label for="">Display icono</label>
+                <div class="form-control" id="preview_icono"></div>
+            </div>
         </div><!-- /.box-body -->
 
         <div class="box-footer">
