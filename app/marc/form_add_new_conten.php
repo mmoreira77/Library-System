@@ -19,7 +19,7 @@
             </div>
             <div class="form-group col-lg-6">
                 <label for="">Display icono</label>
-                <div class="form-control" id="preview_icono"></div>
+                <div class="" id="preview_icono"></div>
             </div>
         </div><!-- /.box-body -->
 
