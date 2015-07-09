@@ -22,10 +22,10 @@
                 <div class="" id="preview_icono"></div>
             </div>
         </div><!-- /.box-body -->
-
+        <input type="hidden" name="operacion" value="1">
         <div class="box-footer">
             <button type="button" class="btn btn-primary btn-block save_tipo_material">Guardar</button>
         </div>
-        <input type="hidden" name="operacion" value="1">
     </form>
+
 </div>
