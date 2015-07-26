@@ -7,6 +7,17 @@ class Conexion {
         $db = mysql_select_db('library', $link) or die('Problema en la selección de la base de datos');
         return $link;
     }
+    
+    public function ConexionPDO(){
+        try {
+            $link = new PDO('mysql:host=localhost;dbname=library','root','191519');
+        }
+        catch (PDOException $ex) {
+            echo "Sucedio un problema al realizar la conexión !!";
+            exit;
+        }
+        return $link;
+    }
 
 }
 
@@ -192,6 +203,13 @@ class Tab extends library {
 
 //Definiendo clase para trabajar con marc
 class Marc extends library {
+    
+    private $conx_pdo;
+
+
+    public function __construct() {
+        $this->conx_pdo = parent::ConexionPDO();
+    }
 
     //Llamada a todos los tipos de material existentes
     public function GetTipoMaterial() {
@@ -205,6 +223,17 @@ class Marc extends library {
         }
         return $table;
     }
+    
+    //Llamada a tipo de material por id
+    public function GetTipoMaterialID($id = NULL) {
+        echo $id;
+        echo '<br>';        
+        $sql = 'select id,name,descripcion,icono from lib_tipo_material where  id = ?';
+        $stm = $this->conx_pdo->prepare($sql);
+        $stm->execute(array($id));
+        $data = $stm->fetchAll(PDO::FETCH_ASSOC);        
+        return $data;
+    }
 
     //Ordeando tipo de material
     public function OrdenarTipoMaterial($data = NULL) {
@@ -213,15 +242,15 @@ class Marc extends library {
             $contador++;
             $table_body.= '<tr><td>' . $contador . '</td><td><img src="app/img/' . $value['icono'] . '"/></td><td>' . $value['name'] . '</td>'
                     . '<td>' . $value['descripcion'] . '</td><td>'
-                    . '<i class="fa fa-fw fa-pencil-square-o edit_item_material" id="'.$value['id'].'"></i>'
-                    . '<i class="fa fa-fw fa-eraser delete_item_material"></i></td></tr>';
+                    . '<i class="fa fa-fw fa-pencil-square-o edit_item_material" id="' . $value['id'] . '"></i>'
+                    . '<i class="fa fa-fw fa-eraser delete_item_material" id="' . $value['id'] . '"></i></td></tr>';
         }
         $table = '<table class="table table-bordered text-center">
                 <thead><tr><th>#</th><th>Icono</th><th>Material</th><th>Descripción</th><th>Edición</th></tr></thead>';
         $table_fin = '</table>';
-        return $table.$table_body.$table_fin;
+        return $table . $table_body . $table_fin;
     }
-    
+
     //Llamando a un item especifico
     public function GetItemId($id = NULL) {
         $query = 'select id,name,descripcion,icono from lib_tipo_material where id = ' . $id;
@@ -243,26 +272,36 @@ class Marc extends library {
                     $result = move_uploaded_file($file_tmp_name, $ruta_final);
                     if ($result) {
                         $query = 'INSERT INTO lib_tipo_material (name, descripcion, icono, date_create, date_modify) '
-                                . ' values("'.$data_post['InputNameTipoMaterial'].'", "'.$data_post['InputDescripcion'].'",'
-                                . '"'.$file_name.'", "'.  date('Y-m-d H:i:s').'", "'.  date('Y-m-d H:i:s').'")';
+                                . ' values("' . $data_post['InputNameTipoMaterial'] . '", "' . $data_post['InputDescripcion'] . '",'
+                                . '"' . $file_name . '", "' . date('Y-m-d H:i:s') . '", "' . date('Y-m-d H:i:s') . '")';
                         $exec = mysql_query($query, $this->Conexion());
                         if ($exec) {
-                        $ope = $this->GetTipoMaterial();    
-                        }  else {
-                        $ope = '<h4>Error en la insercion del registro</h4>';
+                            $ope = $this->GetTipoMaterial();
+                        } else {
+                            $ope = '<h4>Error en la insercion del registro</h4>';
                         }
-                        
                     } else {
                         $ope = 'Operación de subir archivo con error  al mover archivo ';
                     }
-                }else{
+                } elseif(count($data_post) > 0) {
+                    $file_name = 'alert.png';
+                    $query = 'INSERT INTO lib_tipo_material (name, descripcion, icono, date_create, date_modify) '
+                            . ' values("' . $data_post['InputNameTipoMaterial'] . '", "' . $data_post['InputDescripcion'] . '",'
+                            . '"' . $file_name . '", "' . date('Y-m-d H:i:s') . '", "' . date('Y-m-d H:i:s') . '")';
+                    $exec = mysql_query($query, $this->Conexion());
+                    if ($exec) {
+                        $ope = $this->GetTipoMaterial();
+                    } else {
+                        $ope = '<h4>Error en la insercion del registro</h4>';
+                    }
+                } else {
                     $ope = 'Error en el envio la recepción de archivo --> ' . $value['error'];
                 }
             }
         }
         return $ope;
     }
-    
+
     //Actualiza registro
     public function UpdateRegistro($data_post = NULL, $data_file = NULL) {
         if (count($data_file) > 0 && count($data_post) > 0) {
@@ -274,22 +313,34 @@ class Marc extends library {
                     $file_tmp_name = $value['tmp_name'];
                     $ruta_final = $ruta_img . $file_name;
                     $result = move_uploaded_file($file_tmp_name, $ruta_final);
-                    if ($result) {                       
-                        $query = 'UPDATE lib_tipo_material SET name = "'.$data_post['InputNameTipoMaterial'].'", '
-                                . 'descripcion = "'.$data_post['InputDescripcion'].'", '
-                                . 'icono = "'.$file_name.'", date_modify = "'.  date('Y-m-d H:i:s').'"'
+                    if ($result) {
+                        $query = 'UPDATE lib_tipo_material SET name = "' . $data_post['InputNameTipoMaterial'] . '", '
+                                . 'descripcion = "' . $data_post['InputDescripcion'] . '", '
+                                . 'icono = "' . $file_name . '", date_modify = "' . date('Y-m-d H:i:s') . '"'
                                 . ' WHERE id = ' . $data_post['id'];
                         $exec = mysql_query($query, $this->Conexion());
                         if ($exec) {
-                        $ope = $this->GetTipoMaterial();    
-                        }  else {
-                        $ope = '<h4>Error en la insercion del registro</h4>';
+                            $ope = $this->GetTipoMaterial();
+                        } else {
+                            $ope = '<h4>Error en la insercion del registro</h4>';
                         }
-                        
                     } else {
                         $ope = 'Operación de subir archivo con error  al mover archivo ';
                     }
-                }else{
+                }
+                //Si no actualiza la imagen pero si los textos
+                elseif (count($data_post) > 0) {
+                    $query = 'UPDATE lib_tipo_material SET name = "' . $data_post['InputNameTipoMaterial'] . '", '
+                            . 'descripcion = "' . $data_post['InputDescripcion'] . '", '
+                            . 'date_modify = "' . date('Y-m-d H:i:s') . '"'
+                            . ' WHERE id = ' . $data_post['id'];
+                    $exec = mysql_query($query, $this->Conexion());
+                    if ($exec) {
+                        $ope = $this->GetTipoMaterial();
+                    } else {
+                        $ope = '<h4>Error en la insercion del registro</h4>';
+                    }
+                } else {
                     $ope = 'Error en el envio la recepción de archivo --> ' . $value['error'];
                 }
             }

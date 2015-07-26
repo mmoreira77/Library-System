@@ -25,4 +25,13 @@ if (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 0) {
     $update_registro = $obj->UpdateRegistro($_POST, $_FILES);
     echo $update_registro;
 }
+
+//Obteniendo información antes de eliminar para modal
+elseif (isset ($_REQUEST['operacion']) && $_REQUEST['operacion'] == 4) {
+    $tipo_material = $obj->GetTipoMaterialID($_REQUEST['id']);
+    echo '<pre>';
+    print_r($tipo_material);
+    echo '</pre>';
+}
+
 ?>

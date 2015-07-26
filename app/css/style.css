@@ -1,3 +1,6 @@
 .edit_item_material:hover{
     cursor: pointer;
 }
+.delete_item_material:hover{
+    cursor: pointer;
+}

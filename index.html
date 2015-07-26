@@ -935,7 +935,8 @@
          <script src="dist/js/app.min.js" type="text/javascript"></script>
         <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
         <script src="dist/js/pages/dashboard.js" type="text/javascript"></script>        
-                  
+        <!-- Llamada para operaciones de directorio de nombre marc  -->
+        <script src="app/js/library_marc.js" type="text/javascript"></script>
         <script>
             $(document).ready(function () {
                 
@@ -963,16 +964,15 @@
                     });
                 });
                 
-                //Llamada a meteerial
+                //Llamada a meterial
                 $('.item_material').click(function(e){
                     e.preventDefault();
                     $.ajax({
                         url: 'app/marc/item_material.php',
                         type: 'post',
-                        dataType: 'html',
-                        success: function(datos){
-                            $('.body_principal').html(datos);
-                        }
+                        dataType: 'html'
+                    }).done(function(datos){
+                        $('.body_principal').html(datos);
                     });
                 });
             });
