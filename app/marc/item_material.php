@@ -58,7 +58,8 @@ $tipo_material = $obj->GetTipoMaterial();
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-outline pull-left" data-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-outline up_delete_material">Eliminar</button>
+                <button type="button" class="btn btn-outline up_deshabilitar_material" data-dismiss="modal">Deshabilitar</button>
+                <button type="button" class="btn btn-outline up_delete_material" data-dismiss="modal">Eliminar</button>
             </div>
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

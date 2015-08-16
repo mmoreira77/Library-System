@@ -7,13 +7,12 @@ class Conexion {
         $db = mysql_select_db('library', $link) or die('Problema en la selección de la base de datos');
         return $link;
     }
-    
-    public function ConexionPDO(){
+
+    public function ConexionPDO() {
         try {
-            $link = new PDO('mysql:host=localhost;dbname=library','root','191519');
-        }
-        catch (PDOException $ex) {
-            echo "Sucedio un problema al realizar la conexión !!";
+            $link = new PDO('mysql:host=localhost;dbname=library', 'root', '191519');
+        } catch (PDOException $ex) {
+            echo "Sucedio un problema al realizar la conexión !!. Consultar con el administrador del sistema";
             exit;
         }
         return $link;
@@ -203,9 +202,10 @@ class Tab extends library {
 
 //Definiendo clase para trabajar con marc
 class Marc extends library {
-    
-    private $conx_pdo;
 
+    //Por seguridad se define una variable de conexión privada para cada clase, esta variable hace referencia
+    //a la clase que guarda la conexion general.
+    private $conx_pdo;
 
     public function __construct() {
         $this->conx_pdo = parent::ConexionPDO();
@@ -222,17 +222,6 @@ class Marc extends library {
             $table = $this->OrdenarTipoMaterial($data);
         }
         return $table;
-    }
-    
-    //Llamada a tipo de material por id
-    public function GetTipoMaterialID($id = NULL) {
-        echo $id;
-        echo '<br>';        
-        $sql = 'select id,name,descripcion,icono from lib_tipo_material where  id = ?';
-        $stm = $this->conx_pdo->prepare($sql);
-        $stm->execute(array($id));
-        $data = $stm->fetchAll(PDO::FETCH_ASSOC);        
-        return $data;
     }
 
     //Ordeando tipo de material
@@ -283,7 +272,7 @@ class Marc extends library {
                     } else {
                         $ope = 'Operación de subir archivo con error  al mover archivo ';
                     }
-                } elseif(count($data_post) > 0) {
+                } elseif (count($data_post) > 0) {
                     $file_name = 'alert.png';
                     $query = 'INSERT INTO lib_tipo_material (name, descripcion, icono, date_create, date_modify) '
                             . ' values("' . $data_post['InputNameTipoMaterial'] . '", "' . $data_post['InputDescripcion'] . '",'
@@ -346,6 +335,91 @@ class Marc extends library {
             }
         }
         return $ope;
+    }
+
+    //COMIENZO DE METODOS QUE UTILIZAN EXTENSIÓN DE CONEXION
+    //Llamada a tipo de material por id
+    public function GetTipoMaterialID($id = NULL) {
+        //Verificando que no tienen correlativo ni etiquetas asignadas
+        if ($this->consultaCorrelativoTipoMaterial($id) == 0 && $this->consultaEtiquetaTipoMaterial($id) == 0) {
+            $sql = 'select id,name,descripcion,icono from lib_tipo_material where  id = ?';
+            $stm = $this->conx_pdo->prepare($sql);
+            $stm->execute(array($id));
+            $data = $stm->fetch(PDO::FETCH_ASSOC);            
+        } else {
+            $data = $this->ordenamientoSalidaCorrelativoEtiqueta($this->consultaCorrelativoTipoMaterial($id), $this->consultaEtiquetaTipoMaterial($id),$id);
+        }
+        return $data;
+    }
+
+    //Ordenado salida para tipo de material con correlativos de inventario asignados o etiquetas asignadas previamente
+    public function ordenamientoSalidaCorrelativoEtiqueta($correlativos = NULL, $etiquetas = NULL, $id=NULL) {
+        //Ordenando salida para correlativos de inventario
+        if (!empty($correlativos)) {
+            $correlativo = '<dl>'
+                    . '<dt>Correlativo: </dt>'
+                    . '<dd>' . $correlativos['correlativo'] . '</dd>'
+                    . '<dl>';
+        }
+        //Ordenando salida para etiquetas
+        if (!empty($etiquetas)) {
+            $etiqueta = '<dl><dt>Etiquetas asignadas: </dt>';
+            foreach ($etiquetas as $key => $value) {
+                $etiqueta.='<dd>'.$value['name'].' / '.$value['descripcion'].'</dd>';
+            }
+            $etiqueta.='</dl>';
+        }
+        $panel = '<div class="id_tipo_material_deshabilitar" id_tipo_material_deshabilitar="'.$id.'">'.$correlativo.'<hr>'.$etiqueta.$hide_botton.'</div>';
+        return $panel;
+    }
+
+    //Eliminando registro de tipo de material
+    public function deleteTipoMaterial($id = NULL) {
+        $sql = 'delete from lib_tipo_material where id = ?';
+        $stm = $this->conx_pdo->prepare($sql);
+        if ($stm->execute(array($id))) {
+            //$operacion = $this->GetTipoMaterial(); //exitio en la operacion
+            $operacion = $this->consultandoCorrelativoTipoMaterial($id);
+        } else {
+            $operacion = 0; //Error en la operacion
+        }
+        return $operacion;
+    }
+    
+    //Deshabilitando registro de tipo de material
+    public function deshabilitarTipoMaterial($id = NULL) {
+        $sql = 'update lib_tipo_material set stado = 1 where id = ?'; //Estado 1 significa que esta deshabilitado vacio habilitados
+        $stm = $this->conx_pdo->prepare($sql);
+        if ($stm->execute(array($id))) {            
+            $operacion = $this->consultandoCorrelativoTipoMaterial($id);
+        } else {
+            $operacion = 0; //Error en la operacion
+        }
+        return $operacion;
+    }
+
+    //Consultado si tipo de material tiene correlativo asignado mayor que uno para poder eliminar registro
+    public function consultaCorrelativoTipoMaterial($id = NULL) {
+        $sql = 'select id_material,correlativo from lib_inventario_correlativo where id_material = ?';
+        $stm = $this->conx_pdo->prepare($sql);
+        $stm->execute(array($id));
+        $data = $stm->fetch(PDO::FETCH_ASSOC);
+        if (empty($data)) {
+            $data = 0;
+        }
+        return $data;
+    }
+
+    //Consulta para ver si el tipo de material tiene asignado por lo menos una etiqueta marc para eliminar registro
+    public function consultaEtiquetaTipoMaterial($id = NULL) {
+        $sql = 'select id_material,name,descripcion from lib_marc_tag where id_material = ?';
+        $stm = $this->conx_pdo->prepare($sql);
+        $stm->execute(array($id));
+        $data = $stm->fetchAll(PDO::FETCH_ASSOC);
+        if (empty($data)) {
+            $data = 0;
+        }
+        return $data;
     }
 
 }
