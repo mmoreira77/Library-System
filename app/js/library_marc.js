@@ -98,6 +98,10 @@ $('.body_principal').on('click', '.delete_item_material', function (e) {
             $('.up_delete_material').hide();
             $('.up_deshabilitar_material').show();
         }
+        //Ocultando botton deshabilirar si ya esta deshabilitado
+        if($('.bandera_btn_deshabilitar').length > 0){
+            $('.up_deshabilitar_material').hide();
+        }
         $('.modal_item_material_delete').modal();
     });
 
@@ -117,7 +121,7 @@ $('.body_principal').on('click', '.up_delete_material', function (e) {
 });
 
 //Ejecutando deshabilitación de registro
-$('.body_principal').on('click','.up_deshabilitar_material', function(e){
+$('.body_principal').on('click', '.up_deshabilitar_material', function (e) {
     e.preventDefault();
     var id_tipo_material = $('.id_tipo_material_deshabilitar').attr('id_tipo_material_deshabilitar');
     $.ajax({
@@ -125,6 +129,26 @@ $('.body_principal').on('click','.up_deshabilitar_material', function(e){
         type: 'post',
         data: {id: id_tipo_material, operacion: 6}
     }).done(function (datos) {
+        $('.lista_tipo_material_marc').html(datos);
+    });
+});
+
+//Cambiando estado de tipo de material
+$('.body_principal').on('click', '.change_visibility', function (e) {
+    e.preventDefault();
+    var stado_actual = $(this).attr('stado');
+    var id = $(this).attr('id');
+    if (stado_actual === '1') {
+        var stado = '';
+    }
+    if (stado_actual === 'NULL') {
+        stado = 1;
+    }
+    $.ajax({
+        url:'app/marc/operaciones.php',
+        type:'post',
+        data:{stado:stado,id:id,operacion:7}
+    }).done(function(datos){
         $('.lista_tipo_material_marc').html(datos);
     });
 });

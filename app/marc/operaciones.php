@@ -45,7 +45,13 @@ elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 5) {
 
 //Deshabilitando registro
 elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 6) {
-    $delete = $obj->deshabilitarTipoMaterial($_REQUEST['id']);
-    echo $delete;
+    $deshabilitar = $obj->deshabilitarTipoMaterial($_REQUEST['id'],1);
+    echo $deshabilitar;
+}
+
+//Cambiando estado de tipo de material
+elseif (isset($_REQUEST['operacion']) && $_REQUEST['operacion'] == 7) {
+    $change = $obj->deshabilitarTipoMaterial($_REQUEST['id'],$_REQUEST['stado']);
+    echo $change;
 }
 ?>

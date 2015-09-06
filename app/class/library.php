@@ -213,7 +213,7 @@ class Marc extends library {
 
     //Llamada a todos los tipos de material existentes
     public function GetTipoMaterial() {
-        $query = 'select id,name,descripcion,icono from lib_tipo_material';
+        $query = 'select id,name,descripcion,icono,stado from lib_tipo_material';
         $result = mysql_query($query, $this->Conexion());
         if ($result) {
             while ($row = mysql_fetch_assoc($result)) {
@@ -229,13 +229,23 @@ class Marc extends library {
         $contador = 0;
         foreach ($data as $key => $value) {
             $contador++;
+            //Verificando estado de tipo de material si es uno esta deshabilitado
+            if (isset($value['stado']) && $value['stado'] == 1) {
+                $value['stado'] = 'app/img/unenable.png';
+                $stado = 1;
+            } else {
+                $value['stado'] = 'app/img/enable.png';
+                $stado = 'NULL';
+            }
             $table_body.= '<tr><td>' . $contador . '</td><td><img src="app/img/' . $value['icono'] . '"/></td><td>' . $value['name'] . '</td>'
-                    . '<td>' . $value['descripcion'] . '</td><td>'
+                    . '<td>' . $value['descripcion'] . '</td>'
+                    . '<td><img src="' . $value['stado'] . '" class="change_visibility" stado="' . $stado . '" id="' . $value['id'] . '"/></td>'
+                    . '<td>'
                     . '<i class="fa fa-fw fa-pencil-square-o edit_item_material" id="' . $value['id'] . '"></i>'
                     . '<i class="fa fa-fw fa-eraser delete_item_material" id="' . $value['id'] . '"></i></td></tr>';
         }
         $table = '<table class="table table-bordered text-center">
-                <thead><tr><th>#</th><th>Icono</th><th>Material</th><th>Descripción</th><th>Edición</th></tr></thead>';
+                <thead><tr><th>#</th><th>Icono</th><th>Material</th><th>Descripción</th><th>Estado</th><th>Edición</th></tr></thead>';
         $table_fin = '</table>';
         return $table . $table_body . $table_fin;
     }
@@ -337,23 +347,23 @@ class Marc extends library {
         return $ope;
     }
 
-    //COMIENZO DE METODOS QUE UTILIZAN EXTENSIÓN DE CONEXION
+    //COMIENZO DE METODOS QUE UTILIZAN EXTENSIÓN DE CONEXION PDO
     //Llamada a tipo de material por id
     public function GetTipoMaterialID($id = NULL) {
         //Verificando que no tienen correlativo ni etiquetas asignadas
         if ($this->consultaCorrelativoTipoMaterial($id) == 0 && $this->consultaEtiquetaTipoMaterial($id) == 0) {
-            $sql = 'select id,name,descripcion,icono from lib_tipo_material where  id = ?';
+            $sql = 'select id,name,descripcion,icono,stado from lib_tipo_material where  id = ?';
             $stm = $this->conx_pdo->prepare($sql);
             $stm->execute(array($id));
-            $data = $stm->fetch(PDO::FETCH_ASSOC);            
+            $data = $stm->fetch(PDO::FETCH_ASSOC);
         } else {
-            $data = $this->ordenamientoSalidaCorrelativoEtiqueta($this->consultaCorrelativoTipoMaterial($id), $this->consultaEtiquetaTipoMaterial($id),$id);
+            $data = $this->ordenamientoSalidaCorrelativoEtiqueta($this->consultaCorrelativoTipoMaterial($id), $this->consultaEtiquetaTipoMaterial($id), $id);
         }
         return $data;
     }
 
     //Ordenado salida para tipo de material con correlativos de inventario asignados o etiquetas asignadas previamente
-    public function ordenamientoSalidaCorrelativoEtiqueta($correlativos = NULL, $etiquetas = NULL, $id=NULL) {
+    public function ordenamientoSalidaCorrelativoEtiqueta($correlativos = NULL, $etiquetas = NULL, $id = NULL) {
         //Ordenando salida para correlativos de inventario
         if (!empty($correlativos)) {
             $correlativo = '<dl>'
@@ -365,12 +375,30 @@ class Marc extends library {
         if (!empty($etiquetas)) {
             $etiqueta = '<dl><dt>Etiquetas asignadas: </dt>';
             foreach ($etiquetas as $key => $value) {
-                $etiqueta.='<dd>'.$value['name'].' / '.$value['descripcion'].'</dd>';
+                $etiqueta.='<dd>' . $value['name'] . ' / ' . $value['descripcion'] . '</dd>';
             }
             $etiqueta.='</dl>';
         }
-        $panel = '<div class="id_tipo_material_deshabilitar" id_tipo_material_deshabilitar="'.$id.'">'.$correlativo.'<hr>'.$etiqueta.$hide_botton.'</div>';
+        //Para ocultar botton de deshabilitar si ya esta deshabilitado
+        $stado_tipo_materia = $this->stadoTipoMaterial($id);
+        if ($stado_tipo_materia == 1) {
+            $bandera_hide_btn_deshabilitar = '<div class="bandera_btn_deshabilitar"></div>';
+        }
+        $panel = '<div class="id_tipo_material_deshabilitar" id_tipo_material_deshabilitar="' . $id . '">' . $correlativo . '<hr>' . $etiqueta . $hide_botton . '</div>' . $bandera_hide_btn_deshabilitar;
         return $panel;
+    }
+
+    //Obteniendo estado de tipo de material
+    public function stadoTipoMaterial($id = NULL) {
+        $sql = 'select stado from lib_tipo_material where id = ?';
+        $stm = $this->conx_pdo->prepare($sql);
+        if($stm->execute(array($id))){
+            $data = $stm->fetch(PDO::FETCH_ASSOC);
+            $operacion = $data['stado'];
+        }else{
+            $operacion = 0;  //Error en la operacion de consulta
+        }
+        return $operacion;
     }
 
     //Eliminando registro de tipo de material
@@ -378,20 +406,19 @@ class Marc extends library {
         $sql = 'delete from lib_tipo_material where id = ?';
         $stm = $this->conx_pdo->prepare($sql);
         if ($stm->execute(array($id))) {
-            //$operacion = $this->GetTipoMaterial(); //exitio en la operacion
-            $operacion = $this->consultandoCorrelativoTipoMaterial($id);
+            $operacion = $this->GetTipoMaterial(); //exitio en la operacion
         } else {
             $operacion = 0; //Error en la operacion
         }
         return $operacion;
     }
-    
-    //Deshabilitando registro de tipo de material
-    public function deshabilitarTipoMaterial($id = NULL) {
-        $sql = 'update lib_tipo_material set stado = 1 where id = ?'; //Estado 1 significa que esta deshabilitado vacio habilitados
+
+    //Deshabilitando registro de tipo de material desde eliminar
+    public function deshabilitarTipoMaterial($id = NULL, $stado = NULL) {
+        $sql = 'update lib_tipo_material set stado = ? where id = ?'; //Estado 1 significa que esta deshabilitado vacio habilitados
         $stm = $this->conx_pdo->prepare($sql);
-        if ($stm->execute(array($id))) {            
-            $operacion = $this->consultandoCorrelativoTipoMaterial($id);
+        if ($stm->execute(array($stado, $id))) {
+            $operacion = $this->GetTipoMaterial(); //exitio en la operacion
         } else {
             $operacion = 0; //Error en la operacion
         }

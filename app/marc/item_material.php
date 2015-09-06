@@ -10,7 +10,7 @@ $tipo_material = $obj->GetTipoMaterial();
     <div class="new_tipo_material"></div>
 </div>
 
-<div class="box box-success box-solid">
+<div class="box box-primary box-solid">
     <div class="box-header">
         <h3 class="panel-title" id="panel-title">Administrador de material item<a class="anchorjs-link" href="#panel-title"><span class="anchorjs-icon"></span></a></h3>
     </div>

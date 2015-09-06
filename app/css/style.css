@@ -4,3 +4,6 @@
 .delete_item_material:hover{
     cursor: pointer;
 }
+.change_visibility:hover{
+    cursor: pointer;
+}
