@@ -392,10 +392,10 @@ class Marc extends library {
     public function stadoTipoMaterial($id = NULL) {
         $sql = 'select stado from lib_tipo_material where id = ?';
         $stm = $this->conx_pdo->prepare($sql);
-        if($stm->execute(array($id))){
+        if ($stm->execute(array($id))) {
             $data = $stm->fetch(PDO::FETCH_ASSOC);
             $operacion = $data['stado'];
-        }else{
+        } else {
             $operacion = 0;  //Error en la operacion de consulta
         }
         return $operacion;
@@ -439,7 +439,7 @@ class Marc extends library {
 
     //Consulta para ver si el tipo de material tiene asignado por lo menos una etiqueta marc para eliminar registro
     public function consultaEtiquetaTipoMaterial($id = NULL) {
-        $sql = 'select id_material,name,descripcion from lib_marc_tag where id_material = ?';
+        $sql = 'select id_hoja_trabajo,name,descripcion from lib_marc_tag where id_hoja_trabajo = ?';
         $stm = $this->conx_pdo->prepare($sql);
         $stm->execute(array($id));
         $data = $stm->fetchAll(PDO::FETCH_ASSOC);
@@ -447,6 +447,19 @@ class Marc extends library {
             $data = 0;
         }
         return $data;
+    }
+
+}
+
+//Clase para las hojas de trabajo Estructuras MARC par tipos de material
+class HojasTrabajoMarc extends Marc {
+
+    function __construct() {
+        parent::__construct();
+    }
+    
+    public function listaHojasTrabajo() {
+        return 'Marco para hojas de trabajo';
     }
 
 }

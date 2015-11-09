@@ -152,3 +152,4 @@ $('.body_principal').on('click', '.change_visibility', function (e) {
         $('.lista_tipo_material_marc').html(datos);
     });
 });
+
