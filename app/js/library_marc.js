@@ -8,7 +8,7 @@ $('.body_principal').on('click', '.save_tipo_material', function (e) {
         data: data_form_nuevo_material,
         cache: false,
         contentType: false,
-        processData: false
+        processData: false 
     }).done(function (datos) {
         $('.new_tipo_material').html('');
         $('.lista_tipo_material_marc').html(datos);
